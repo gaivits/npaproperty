@@ -1,7 +1,5 @@
 import { Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { take } from 'rxjs';
-
 import { Repository } from 'typeorm';
 import { Npanews } from './entities/npanews.entity';
 
@@ -9,22 +7,7 @@ import { Npanews } from './entities/npanews.entity';
 export class NpanewsService {
     constructor(@InjectRepository(Npanews) private readonly npanews : Repository<Npanews>){}
 
-    async getAll(pages ?: number , limits ?: number) 
-    {
-        const [list, counts] = await this.npanews.findAndCount(
-            {
-                order : {
-                    created_date : 'DESC'
-                },
-                skip : (pages-1)*limits,
-                take : pages
-            }
-        );
-        return {
-            data:list,counts,pages,limits
-        }
-    }
-    async getOne(id : number,pages ?: number , limits ?: number)
+    async getAll(pages ?: number , limits ?: number) : Promise<any>
     {
         const [list, counts] = await this.npanews.findAndCount(
             {
@@ -32,14 +15,47 @@ export class NpanewsService {
                     created_date : 'DESC'
                 },
                 where:{
-                    npanews_id : id
+                    is_news:true,
+                    is_recommended:true,
+                    is_active:true,
+                    is_approved:true
                 },
-                skip : (pages-1)*limits,
-                take : pages
+                skip : (+pages-1)*limits,
+                take : +limits
             }
-        );
-        return {
-            data:list,counts,limits,pages
+        )
+        if(pages && limits)
+        {
+            return {
+                counts,
+                pages,
+                limits,
+                list
+            }
         }
+        else
+        {
+            return  {counts,list}
+        }
+    }
+    async getById(id : number,pages ?: number , limits ?: number) : Promise<any>
+    {
+        const [list, counts] = await this.npanews.findAndCount(
+            {
+                order : {
+                    created_date : 'DESC'
+                },
+                where:{
+                    npanews_id : id,
+                    is_news:true,
+                    is_recommended:true,
+                    is_active:true,
+                    is_approved:true,
+                },
+                skip : (+pages-1)*(+limits),
+                take : +limits
+            }
+        )
+        return list
     }
 }
