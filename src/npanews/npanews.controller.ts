@@ -11,7 +11,7 @@ export class NpanewsController {
   }
   
   @Get('news/:npanews_id')
-  async getById(@Param('npanews_id') id : number,@Query() q ?: {pages:string,limits:string})
+  async getById(@Param('npanews_id') id : number,@Query() q : {pages:string,limits:string})
   {
       return await this.npanewsService.getById(id,+q.pages,+q.limits)
   } 
